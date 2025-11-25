@@ -173,8 +173,6 @@ const onHandleCommandClick = (path: string) => {
 				window.location.reload();
 			})
 			.catch(() => {});
-	} else if (path === 'wareHouse') {
-		window.open('https://gitee.com/huge-dream/django-vue3-admin');
 	} else {
 		router.push(path);
 	}

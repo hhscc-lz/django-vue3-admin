@@ -16,11 +16,6 @@
 			</div>
 			<div class="upgrade-content">
 				{{ getThemeConfig.globalTitle }} {{ $t('message.upgrade.msg') }}
-				<div class="mt5">
-					<el-link type="primary" class="font12" href="https://gitee.com/huge-dream/django-vue3-admin/blob/master/CHANGELOG.md" target="_black">
-						CHANGELOG.md
-					</el-link>
-				</div>
 				<div class="upgrade-content-desc mt5">{{ $t('message.upgrade.desc') }}</div>
 			</div>
 			<div class="upgrade-btn">

@@ -1,32 +1,65 @@
+# ============================================
+# 核心必需依赖 (长春市社情民意分析平台)
+# ============================================
+
+# Django 核心
 Django==4.2.14
+djangorestframework==3.15.2
+djangorestframework_simplejwt==5.4.0
+
+# 数据库和迁移
 django-comment-migrate==0.1.7
+mysqlclient==2.2.4
+
+# Django 扩展
 django-cors-headers==4.4.0
 django-filter==24.2
-django-ranged-response==0.2.0
-djangorestframework==3.15.2
 django-restql==0.15.4
-django-simple-captcha==0.6.0
 django-timezone-field==7.0
-djangorestframework_simplejwt==5.4.0
+
+# API 文档
 drf-yasg==1.21.10
+
+# 工具库
 pypinyin==0.51.0
 ua-parser==0.18.0
+user-agents==2.2.0
 pyparsing==3.1.2
 openpyxl==3.1.5
 requests==2.32.4
 typing-extensions==4.12.2
 tzlocal==5.2
+six==1.16.0
+Pillow==10.4.0
+
+# ============================================
+# 可选依赖 (根据需求安装)
+# ============================================
+
+# 验证码 (如果需要登录验证码)
+django-simple-captcha==0.6.0
+
+# WebSocket 支持 (如果需要实时通信)
 channels==4.1.0
 channels-redis==4.2.0
-user-agents==2.2.0
-six==1.16.0
-whitenoise==6.7.0
-psycopg2==2.9.9
-uvicorn==0.30.3
-gunicorn==23.0.0
-gevent==24.2.1
-Pillow==10.4.0
-pyinstaller==6.9.0
+
+# 云存储 (如果使用阿里云/腾讯云)
+# oss2==2.19.1
+# cos-python-sdk-v5==1.9.37
+
+# 异步任务队列 (如果需要后台任务)
 dvadmin3-celery==3.1.6
-oss2==2.19.1
-cos-python-sdk-v5==1.9.37
+
+# 生产环境服务器
+gunicorn==23.0.0
+uvicorn==0.30.3
+gevent==24.2.1
+
+# 静态文件服务
+whitenoise==6.7.0
+
+# PostgreSQL 支持 (如果使用PostgreSQL)
+# psycopg2==2.9.9
+
+# 应用打包 (如果需要打包成exe)
+# pyinstaller==6.9.0
