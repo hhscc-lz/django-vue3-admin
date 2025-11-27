@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "captcha",
     "channels",
     "dvadmin.system",
+    "plugins.complaint",  # 工单管理插件
     "plugins.risk_warning",  # 风险预警插件
 ]
 
@@ -108,21 +109,10 @@ DATABASES = {
         "PASSWORD": DATABASE_PASSWORD,
         "HOST": DATABASE_HOST,
         "PORT": DATABASE_PORT,
-    },
-    "intelligence": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "changchun",  # 智能分析数据库
-        "USER": DATABASE_USER,
-        "PASSWORD": DATABASE_PASSWORD,
-        "HOST": DATABASE_HOST,
-        "PORT": DATABASE_PORT,
     }
 }
 AUTH_USER_MODEL = "system.Users"
 USERNAME_FIELD = "username"
-
-# 数据库路由器配置
-DATABASE_ROUTERS = ['application.db_router.IntelligenceDBRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -415,6 +405,10 @@ TENANT_SHARED_APPS = []
 TENANT_EXCLUSIVE_APPS = []
 # 插件 urlpatterns
 PLUGINS_URL_PATTERNS = [
+    {
+        're_path': r'^api/complaint/',
+        'include': 'plugins.complaint.urls'
+    },
     {
         're_path': r'^api/risk_warning/',
         'include': 'plugins.risk_warning.urls'

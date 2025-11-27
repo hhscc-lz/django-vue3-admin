@@ -3,7 +3,8 @@
 """
 from rest_framework import serializers
 from dvadmin.utils.serializers import CustomModelSerializer
-from .models import RiskTag, Complaint
+from .models import RiskTag
+from plugins.complaint.models import Complaint
 
 
 class ComplaintSimpleSerializer(serializers.ModelSerializer):

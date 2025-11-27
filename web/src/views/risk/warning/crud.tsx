@@ -8,8 +8,10 @@ import { downloadExportFile } from './api'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 import { dictionary } from '/@/utils/dictionary'
+import type { Ref } from 'vue'
 
-export const createCrudOptions = function ({ crudExpose }: CreateCrudOptionsProps): CreateCrudOptionsRet {
+export const createCrudOptions = function (props: CreateCrudOptionsProps & { complaintDetailRef?: Ref<any> }): CreateCrudOptionsRet {
+  const { crudExpose, complaintDetailRef } = props
   // 页面请求
   const pageRequest = async (query: RiskTagQuery) => {
     // ✅ 在这里统一处理默认过滤和参数转换
@@ -92,7 +94,13 @@ export const createCrudOptions = function ({ crudExpose }: CreateCrudOptionsProp
           view: {
             show: true,
             text: '查看',
-            type: 'text'
+            type: 'text',
+            click: ({ row }: any) => {
+              // 打开工单详情弹窗
+              if (complaintDetailRef && complaintDetailRef.value) {
+                complaintDetailRef.value.open(row.complaint_id)
+              }
+            }
           },
           edit: { show: false },
           remove: { show: false }
