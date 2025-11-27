@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "captcha",
     "channels",
     "dvadmin.system",
+    "plugins.risk_warning",  # 风险预警插件
 ]
 
 MIDDLEWARE = [
@@ -107,10 +108,21 @@ DATABASES = {
         "PASSWORD": DATABASE_PASSWORD,
         "HOST": DATABASE_HOST,
         "PORT": DATABASE_PORT,
+    },
+    "intelligence": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "changchun",  # 智能分析数据库
+        "USER": DATABASE_USER,
+        "PASSWORD": DATABASE_PASSWORD,
+        "HOST": DATABASE_HOST,
+        "PORT": DATABASE_PORT,
     }
 }
 AUTH_USER_MODEL = "system.Users"
 USERNAME_FIELD = "username"
+
+# 数据库路由器配置
+DATABASE_ROUTERS = ['application.db_router.IntelligenceDBRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -402,7 +414,12 @@ TENANT_SHARED_APPS = []
 # 普通租户独有app
 TENANT_EXCLUSIVE_APPS = []
 # 插件 urlpatterns
-PLUGINS_URL_PATTERNS = []
+PLUGINS_URL_PATTERNS = [
+    {
+        're_path': r'^api/risk_warning/',
+        'include': 'plugins.risk_warning.urls'
+    }
+]
 # 所有模式有的
 SHARED_APPS = []
 # ********** 一键导入插件配置开始 **********
