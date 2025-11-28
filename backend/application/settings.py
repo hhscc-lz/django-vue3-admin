@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "plugins.risk_warning",  # 风险预警插件
     "plugins.spatial_annotation",  # 空间标注插件
     "plugins.subject_annotation",  # 主体标注插件
+    "plugins.topic_annotation",  # 专题标注插件
 ]
 
 MIDDLEWARE = [
@@ -422,6 +423,10 @@ PLUGINS_URL_PATTERNS = [
     {
         're_path': r'^api/subject_annotation/',
         'include': 'plugins.subject_annotation.urls'
+    },
+    {
+        're_path': r'^api/topic_annotation/',
+        'include': 'plugins.topic_annotation.urls'
     }
 ]
 # 所有模式有的
