@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "dvadmin.system",
     "plugins.complaint",  # 工单管理插件
     "plugins.risk_warning",  # 风险预警插件
+    "plugins.spatial_annotation",  # 空间标注插件
 ]
 
 MIDDLEWARE = [
@@ -412,6 +413,10 @@ PLUGINS_URL_PATTERNS = [
     {
         're_path': r'^api/risk_warning/',
         'include': 'plugins.risk_warning.urls'
+    },
+    {
+        're_path': r'^api/spatial_annotation/',
+        'include': 'plugins.spatial_annotation.urls'
     }
 ]
 # 所有模式有的
