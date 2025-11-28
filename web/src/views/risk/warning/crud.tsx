@@ -233,6 +233,7 @@ export const createCrudOptions = function (props: CreateCrudOptionsProps & { com
           type: 'datetime-range',
           search: {
             show: true,
+            col: { span: 8 },  // 设置搜索框占据的栅格列数（默认是6，增加到8让宽度更长）
             component: {
               name: 'el-date-picker',
               type: 'datetimerange',
