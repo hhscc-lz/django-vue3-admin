@@ -198,6 +198,83 @@ export const serviceForMock = createService();
 export const requestForMock = createRequestFunction(serviceForMock);
 
 /**
+ * @description 创建 LLM 服务专用 axios 实例
+ * 用于调用独立的 AI 分析服务（不同于主项目后端）
+ */
+function createLLMService() {
+	// 从环境变量获取 LLM 服务地址
+	const llmBaseURL = import.meta.env.VITE_LLM_API_BASE_URL || 'http://localhost:8001';
+
+	const llmService = axios.create({
+		baseURL: llmBaseURL,
+		timeout: 300000, // 5 分钟超时（LLM 调用耗时）
+		headers: {
+			'Content-Type': 'application/json;charset=utf-8',
+		},
+	});
+
+	// 响应拦截器（处理 LLM 服务的响应格式）
+	llmService.interceptors.response.use(
+		(response) => {
+			const dataAxios = response.data;
+			const { code } = dataAxios;
+
+			// LLM 服务的成功响应码
+			if (code === undefined || code === 2000) {
+				return dataAxios;
+			} else {
+				// 错误处理
+				errorCreate(`${dataAxios.msg}: ${response.config.url}`);
+				return Promise.reject(dataAxios);
+			}
+		},
+		(error) => {
+			// 错误处理
+			const status = get(error, 'response.status');
+			switch (status) {
+				case 400:
+					error.message = '请求错误';
+					break;
+				case 500:
+					error.message = 'LLM服务内部错误';
+					break;
+				case 504:
+					error.message = 'LLM服务响应超时，请稍后重试';
+					break;
+				default:
+					error.message = error.message || 'LLM服务请求失败';
+			}
+			errorLog(error);
+			return Promise.reject(error);
+		}
+	);
+
+	return llmService;
+}
+
+/**
+ * @description 创建 LLM 请求方法
+ */
+function createLLMRequestFunction(llmService: any) {
+	return function (config: any) {
+		const configDefault = {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			timeout: 300000, // 5 分钟超时
+			data: {},
+		};
+		Object.assign(configDefault, config);
+		// LLM 服务不需要 JWT token，如果需要其他认证方式可以在这里添加
+		return llmService(configDefault);
+	};
+}
+
+// 导出 LLM 服务实例和请求方法
+export const llmService = createLLMService();
+export const llmRequest = createLLMRequestFunction(llmService);
+
+/**
  * 下载文件
  * @param url
  * @param params

@@ -36,12 +36,14 @@
 		"element-plus": "^2.8.0",
 		"element-tree-line": "^0.2.1",
 		"font-awesome": "^4.7.0",
+		"github-markdown-css": "^5.8.1",
 		"js-cookie": "^3.0.5",
 		"js-table2excel": "^1.1.2",
 		"jsplumb": "^2.15.6",
 		"less": "^4.3.0",
 		"lodash-es": "^4.17.21",
 		"lunar-javascript": "^1.7.1",
+		"markdown-it": "^14.1.0",
 		"mitt": "^3.0.1",
 		"nprogress": "^0.2.0",
 		"pinia": "^2.0.28",
@@ -72,6 +74,7 @@
 		"xe-utils": "^3.5.30"
 	},
 	"devDependencies": {
+		"@types/markdown-it": "^14.1.2",
 		"@types/node": "^18.19.42",
 		"@types/nprogress": "^0.2.3",
 		"@types/sortablejs": "^1.15.8",
