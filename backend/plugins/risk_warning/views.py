@@ -3,16 +3,18 @@
 """
 from django.db.models import Q
 from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
 from openpyxl import Workbook
 from django.http import HttpResponse
 from datetime import datetime
+from django.shortcuts import get_object_or_404
 
 from .models import RiskTag
 from .serializers import RiskTagSerializer, RiskTagExportSerializer
 from dvadmin.utils.viewset import CustomModelViewSet
+from plugins.complaint.models import Complaint
 
 
 class RiskTagFilter(filters.FilterSet):
@@ -167,3 +169,159 @@ class RiskTagViewSet(CustomModelViewSet):
             'code': 4000,
             'msg': '风险预警数据为只读，不支持删除操作'
         }, status=403)
+
+
+# ==================== 风险标注浏览API ====================
+@api_view(['GET'])
+def risk_annotation_list(request):
+    """
+    风险标注列表接口
+
+    前端页面: /annotation/risk
+    查询 risk_tags 表中 is_risk=1 的记录，联表 complaints 获取工单信息
+
+    参数:
+    - page: 页码 (默认1)
+    - size: 每页条数 (默认10)
+
+    返回:
+    {
+        "code": 2000,
+        "msg": "success",
+        "data": {
+            "data": [...],  # 数据列表
+            "total": 100,   # 总条数
+            "page": 1,      # 当前页
+            "size": 10      # 每页条数
+        }
+    }
+    """
+    try:
+        # 模拟加载延迟 3秒
+        import time
+        time.sleep(3)
+
+        # 获取分页参数
+        page = int(request.GET.get('page', 1))
+        size = int(request.GET.get('size', 10))
+
+        # 查询 is_risk=1 的记录，联表 complaints
+        queryset = RiskTag.objects.filter(is_risk=True).select_related('complaint').order_by('-created_at')
+
+        # 计算总数
+        total = queryset.count()
+
+        # 分页
+        start = (page - 1) * size
+        end = start + size
+        risk_tags = queryset[start:end]
+
+        # 构建返回数据（左侧列表不显示风险类别，模拟"待标注"状态）
+        data_list = []
+        for risk_tag in risk_tags:
+            complaint = risk_tag.complaint
+            if complaint:
+                data_list.append({
+                    'complaint_id': complaint.id,
+                    'title': complaint.title or '',
+                    'content': complaint.content or '',
+                    'accept_time': complaint.accept_time.strftime('%Y-%m-%d %H:%M:%S') if complaint.accept_time else '',
+                    'status': complaint.status or '',
+                    'region': complaint.region or '',
+                    # 左侧列表不显示风险类别，保持"待标注"外观
+                    # 'is_risk': risk_tag.is_risk,
+                    # 'risk_category': risk_tag.risk_category or '',
+                    # 'annotated_at': risk_tag.created_at.strftime('%Y-%m-%d %H:%M:%S') if risk_tag.created_at else ''
+                })
+
+        return Response({
+            'code': 2000,
+            'msg': 'success',
+            'data': {
+                'data': data_list,
+                'total': total,
+                'page': page,
+                'size': size
+            }
+        })
+    except Exception as e:
+        return Response({
+            'code': 4000,
+            'msg': f'查询失败: {str(e)}',
+            'data': None
+        }, status=500)
+
+
+@api_view(['GET'])
+def risk_annotation_detail(request, complaint_id):
+    """
+    风险标注详情接口
+
+    根据 complaint_id 查询风险标注详情和完整工单信息
+
+    参数:
+    - complaint_id: 工单编号 (URL路径参数)
+
+    返回:
+    {
+        "code": 2000,
+        "msg": "success",
+        "data": {
+            "complaint": {...},  # 工单完整信息
+            "risk": {...}        # 风险标注信息
+        }
+    }
+    """
+    try:
+        # 模拟加载延迟 3秒
+        import time
+        time.sleep(3)
+
+        # 查询风险标注记录
+        risk_tag = get_object_or_404(
+            RiskTag.objects.select_related('complaint'),
+            complaint__id=complaint_id,
+            is_risk=True
+        )
+
+        complaint = risk_tag.complaint
+
+        # 构建返回数据
+        data = {
+            'complaint': {
+                'complaint_id': complaint.id,
+                'title': complaint.title or '',
+                'content': complaint.content or '',
+                'accept_time': complaint.accept_time.strftime('%Y-%m-%d %H:%M:%S') if complaint.accept_time else '',
+                'status': complaint.status or '',
+                'region': complaint.region or '',
+                'complainant_name': complaint.complainant_name or '',
+                'complainant_phone': complaint.complainant_phone or '',
+                'handle_department': complaint.handle_department or '',
+                'source_channel': complaint.source_channel or '',
+            },
+            'risk': {
+                'is_risk': risk_tag.is_risk,
+                'risk_category': risk_tag.risk_category or '',
+                'risk_reason': risk_tag.risk_reason or '',
+                'annotated_at': risk_tag.created_at.strftime('%Y-%m-%d %H:%M:%S') if risk_tag.created_at else ''
+            }
+        }
+
+        return Response({
+            'code': 2000,
+            'msg': 'success',
+            'data': data
+        })
+    except RiskTag.DoesNotExist:
+        return Response({
+            'code': 4004,
+            'msg': f'未找到工单 {complaint_id} 的风险标注信息',
+            'data': None
+        }, status=404)
+    except Exception as e:
+        return Response({
+            'code': 4000,
+            'msg': f'查询失败: {str(e)}',
+            'data': None
+        }, status=500)
