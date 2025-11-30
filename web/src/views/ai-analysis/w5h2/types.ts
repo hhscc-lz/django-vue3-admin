@@ -1,5 +1,5 @@
 /**
- * 5W2H 分析类型定义
+ * 综合查询类型定义
  */
 
 /**
@@ -12,44 +12,7 @@ export interface ApiResponse<T> {
 }
 
 /**
- * 查询请求
- */
-export interface SearchRequest {
-  start_time?: string     // 开始时间
-  end_time?: string       // 结束时间
-  region?: string         // 地区
-  keywords?: string       // 关键词
-  serial_number?: string  // 工单编号
-  type?: string           // 诉求类型
-  page: number
-  size: number
-}
-
-/**
- * 诉求列表项
- */
-export interface ComplaintItem {
-  serial_number: string
-  title: string
-  content: string
-  time: string
-  region: string
-  status: string
-  type: string
-}
-
-/**
- * 查询响应
- */
-export interface SearchResponse {
-  data: ComplaintItem[]
-  total: number
-  page: number
-  size: number
-}
-
-/**
- * 诉求详情（简化的5W2H结构，不分模块）
+ * 诉求详情
  */
 export interface ComplaintDetail {
   // What - 诉求概况
@@ -89,18 +52,6 @@ export interface ComplaintDetail {
 }
 
 /**
- * 大模型分析请求
- */
-export interface AnalyzeRequest {
-  start_time?: string
-  end_time?: string
-  region?: string
-  keywords?: string
-  serial_number?: string
-  type?: string
-}
-
-/**
  * 分析摘要
  */
 export interface AnalysisSummary {
@@ -133,4 +84,83 @@ export interface AnalyzeResponse {
 export interface ExportReportRequest {
   analysis: string
   summary: AnalysisSummary
+}
+
+// ==================== 综合查询相关类型 ====================
+
+/**
+ * 查询条件
+ */
+export interface FilterCondition {
+  field: string
+  operator: string
+  value: any
+}
+
+/**
+ * 综合查询请求
+ */
+export interface ComprehensiveSearchRequest {
+  filters: FilterCondition[]
+  logic: 'AND' | 'OR'
+  page: number
+  size: number
+  sort_field?: string
+  sort_order?: 'asc' | 'desc'
+}
+
+/**
+ * 综合查询响应
+ */
+export interface ComprehensiveSearchResponse {
+  data: Array<Record<string, any>>
+  total: number
+  page: number
+  size: number
+}
+
+/**
+ * 字段配置项
+ */
+export interface FieldConfigItem {
+  field: string
+  label: string
+  es_type: string
+  control: string
+  operators: string[]
+  options?: Array<{ value: string; label: string }>
+  nested_path?: string
+  dynamic_options?: boolean
+}
+
+/**
+ * 字段配置响应
+ */
+export interface FieldConfigResponse {
+  fields: FieldConfigItem[]
+}
+
+/**
+ * 字段可选值请求
+ */
+export interface FieldOptionRequest {
+  field: string
+  size?: number
+}
+
+/**
+ * 字段可选值项
+ */
+export interface FieldOption {
+  value: string
+  label: string
+  count?: number
+}
+
+/**
+ * 字段可选值响应
+ */
+export interface FieldOptionResponse {
+  field: string
+  options: FieldOption[]
 }

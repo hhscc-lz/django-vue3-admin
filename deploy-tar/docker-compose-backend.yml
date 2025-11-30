@@ -1,0 +1,15 @@
+version: "3"
+services:
+  dvadmin3-django:
+    container_name: dvadmin3-django
+    image: changchun/dvadmin3-django-arm64:0.0.1
+    working_dir: /backend
+    ports:
+      - "8882:8000"  # 宿主机8882映射到容器8000
+    environment:
+      PYTHONUNBUFFERED: 1
+      TZ: Asia/Shanghai
+    volumes:
+      - ./backend/media:/backend/media  # 用户上传文件
+      - ./logs/log:/var/log              # 应用日志
+    restart: always

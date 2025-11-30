@@ -1,3 +1,7 @@
+import os
+
+from application.settings import BASE_DIR
+
 # ================================================= #
 # *************** mysql数据库 配置  *************** #
 # ================================================= #
@@ -11,9 +15,9 @@ DATABASE_ENGINE = "django.db.backends.mysql"
 DATABASE_NAME = 'changchun_platform' # mysql 时使用
 
 # 数据库地址 改为自己数据库地址
-DATABASE_HOST = '192.168.0.75'
+DATABASE_HOST = '218.60.145.191'
 # # 数据库端口
-DATABASE_PORT = 8900
+DATABASE_PORT = 8886
 # # 数据库用户名
 DATABASE_USER = "root"
 # # 数据库密码
@@ -25,15 +29,16 @@ TABLE_PREFIX = ""
 # ******** redis配置，无redis 可不进行配置  ******** #
 # ================================================= #
 REDIS_DB = 4
+CELERY_BROKER_DB = 3
 REDIS_PASSWORD = 'Mx@12345'
-REDIS_HOST = '192.168.0.75'
-REDIS_URL = f'redis://:{REDIS_PASSWORD or ""}@{REDIS_HOST}:8899'
+REDIS_HOST = '127.0.0.1'
+REDIS_URL = f'redis://:{REDIS_PASSWORD or ""}@{REDIS_HOST}:6379'
 # ================================================= #
 # ****************** 功能 启停  ******************* #
 # ================================================= #
-DEBUG = False
+DEBUG = True
 # 启动登录详细概略获取(通过调用api获取ip详细地址。如果是内网，关闭即可)
-ENABLE_LOGIN_ANALYSIS_LOG = False
+ENABLE_LOGIN_ANALYSIS_LOG = True
 # 登录接口 /api/token/ 是否需要验证码认证，用于测试，正式环境建议取消
 LOGIN_NO_CAPTCHA_AUTH = False
 # ================================================= #

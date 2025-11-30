@@ -8,10 +8,7 @@
 	</div>
 </template>
 
-<script lang="ts" name="home">
-import { toRefs, reactive, defineComponent, onMounted, ref, watch, nextTick, onActivated } from 'vue';
-
-
+<script setup lang="ts" name="home">
 </script>
 
 <style scoped lang="scss">

@@ -4,91 +4,84 @@
     <el-card class="query-panel" shadow="never">
       <template #header>
         <div class="card-header">
-          <span class="card-title">5W2H 诉求分析</span>
+          <span class="card-title">综合查询</span>
+          <span class="field-count">共 {{ fieldConfigs.length }} 个可查询字段</span>
         </div>
       </template>
 
-      <el-form :model="queryForm" label-width="90px">
+      <el-form :model="queryForm" label-width="120px" v-loading="loading.init">
         <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="时间范围">
-              <el-date-picker
-                v-model="queryForm.dateRange"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                value-format="YYYY-MM-DD"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="12">
-            <el-form-item label="地区">
-              <el-select
-                v-model="queryForm.region"
-                clearable
-                placeholder="请选择地区"
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="item in regionOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+          <!-- 动态渲染所有字段 -->
+          <template v-for="field in fieldConfigs" :key="field.field">
+            <el-col :span="field.control === 'daterange' ? 12 : 8">
+              <el-form-item :label="field.label">
+                <!-- 文本输入 -->
+                <el-input
+                  v-if="field.control === 'input'"
+                  v-model="queryForm[field.field]"
+                  :placeholder="`请输入${field.label}`"
+                  clearable
                 />
-              </el-select>
-            </el-form-item>
-          </el-col>
+
+                <!-- 下拉选择 -->
+                <el-select
+                  v-else-if="field.control === 'select'"
+                  v-model="queryForm[field.field]"
+                  :placeholder="`请选择${field.label}`"
+                  clearable
+                  filterable
+                  :multiple="false"
+                  @focus="loadFieldOptions(field.field)"
+                >
+                  <el-option
+                    v-for="option in getFieldOptions(field)"
+                    :key="option.value"
+                    :label="option.label"
+                    :value="option.value"
+                  />
+                </el-select>
+
+                <!-- 日期范围选择 -->
+                <el-date-picker
+                  v-else-if="field.control === 'daterange'"
+                  v-model="queryForm[field.field]"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  value-format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
+
+                <!-- 数值输入 -->
+                <el-input-number
+                  v-else-if="field.control === 'number'"
+                  v-model="queryForm[field.field]"
+                  :placeholder="`请输入${field.label}`"
+                  :controls="false"
+                  style="width: 100%"
+                />
+
+                <!-- 布尔开关 -->
+                <el-switch
+                  v-else-if="field.control === 'switch'"
+                  v-model="queryForm[field.field]"
+                  active-text="是"
+                  inactive-text="否"
+                />
+              </el-form-item>
+            </el-col>
+          </template>
         </el-row>
 
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="关键词">
-              <el-input
-                v-model="queryForm.keywords"
-                clearable
-                placeholder="请输入关键词"
-              />
+        <el-row>
+          <el-col :span="24">
+            <el-form-item>
+              <el-button type="primary" :loading="loading.search" @click="onSearch">
+                查询
+              </el-button>
+              <el-button @click="onReset">重置</el-button>
             </el-form-item>
-          </el-col>
-
-          <el-col :span="12">
-            <el-form-item label="工单编号">
-              <el-input
-                v-model="queryForm.serialNumber"
-                clearable
-                placeholder="请输入工单编号"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="诉求类型">
-              <el-select
-                v-model="queryForm.type"
-                clearable
-                placeholder="请选择诉求类型"
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="item in typeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="12" style="text-align: right">
-            <el-button type="primary" :loading="loading.search" @click="onSearch">
-              查询
-            </el-button>
-            <el-button @click="onReset">重置</el-button>
           </el-col>
         </el-row>
       </el-form>
@@ -262,30 +255,36 @@
 </template>
 
 <script setup lang="ts" name="w5h2Analysis">
-import { reactive, ref, computed, nextTick } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import MarkdownIt from 'markdown-it'
 import 'github-markdown-css/github-markdown.css'
 import * as api from './api'
-import type { ComplaintItem, ComplaintDetail, AnalysisSummary } from './types'
-import { dictionary } from '/@/utils/dictionary'
+import type {
+  ComplaintItem,
+  ComplaintDetail,
+  AnalysisSummary,
+  FilterCondition,
+  FieldConfigItem
+} from './types'
 
-// 查询表单
-const queryForm = reactive({
-  dateRange: [] as string[],
-  region: '',
-  keywords: '',
-  serialNumber: '',
-  type: ''
-})
+// 查询表单（动态字段）
+const queryForm = reactive<Record<string, any>>({})
+
+// 字段配置
+const fieldConfigs = ref<FieldConfigItem[]>([])
+
+// 字段动态可选值缓存
+const fieldOptionsCache = ref<Record<string, Array<{ value: string; label: string }>>>({})
 
 // 加载状态
 const loading = reactive({
   search: false,
   detail: false,
   analysis: false,
-  exporting: false
+  exporting: false,
+  init: false
 })
 
 // 分页
@@ -307,10 +306,6 @@ const analysisReport = ref('')
 const analysisSummary = ref<AnalysisSummary | null>(null)
 const analysisSectionRef = ref<any>(null)
 
-// 字典选项
-const regionOptions = computed(() => dictionary('region') || [])
-const typeOptions = computed(() => dictionary('complaint_type') || [])
-
 // Markdown 渲染器
 const md = new MarkdownIt({
   html: true,
@@ -324,19 +319,141 @@ const analysisHtml = computed(() =>
   analysisReport.value ? md.render(analysisReport.value) : ''
 )
 
+// 获取字段可选值
+const getFieldOptions = (field: FieldConfigItem) => {
+  // 如果有固定可选值，返回固定值
+  if (field.options && !field.dynamic_options) {
+    return field.options
+  }
+
+  // 返回缓存的动态可选值
+  return fieldOptionsCache.value[field.field] || []
+}
+
+// 加载字段动态可选值
+const loadFieldOptions = async (fieldName: string) => {
+  const field = fieldConfigs.value.find(f => f.field === fieldName)
+  if (!field || !field.dynamic_options) return
+
+  // 如果已经加载过，直接返回
+  if (fieldOptionsCache.value[fieldName]) return
+
+  try {
+    const res = await api.getFieldOptions({ field: fieldName, size: 100 })
+    if (res.code === 2000) {
+      fieldOptionsCache.value[fieldName] = res.data.options
+    }
+  } catch (error) {
+    console.error('加载字段可选值失败:', error)
+  }
+}
+
+// 初始化：加载字段配置
+const initFieldConfigs = async () => {
+  loading.init = true
+  try {
+    const res = await api.getFieldConfigs()
+    if (res.code === 2000) {
+      fieldConfigs.value = res.data.fields
+
+      // 初始化queryForm的所有字段
+      res.data.fields.forEach(field => {
+        if (field.control === 'switch') {
+          queryForm[field.field] = undefined
+        } else if (field.control === 'daterange') {
+          queryForm[field.field] = []
+        } else {
+          queryForm[field.field] = undefined
+        }
+      })
+
+      ElMessage.success('初始化成功')
+    } else {
+      ElMessage.error(res.msg || '初始化失败')
+    }
+  } catch (error: any) {
+    console.error('加载字段配置失败:', error)
+    ElMessage.error('初始化失败，请刷新页面重试')
+  } finally {
+    loading.init = false
+  }
+}
+
+// 构建查询条件
+const buildFilters = (): FilterCondition[] => {
+  const filters: FilterCondition[] = []
+
+  fieldConfigs.value.forEach(field => {
+    const value = queryForm[field.field]
+
+    // 跳过空值
+    if (value === undefined || value === null || value === '') {
+      return
+    }
+
+    // 跳过空数组
+    if (Array.isArray(value) && value.length === 0) {
+      return
+    }
+
+    // 根据字段类型和控件确定操作符
+    let operator = field.operators[0] // 默认使用第一个操作符
+    let filterValue = value
+
+    // 日期范围特殊处理
+    if (field.control === 'daterange' && Array.isArray(value) && value.length === 2) {
+      operator = 'range'
+      filterValue = value
+    }
+    // 下拉选择默认使用eq
+    else if (field.control === 'select') {
+      operator = 'eq'
+    }
+    // 文本输入默认使用like
+    else if (field.control === 'input' && field.es_type === 'text') {
+      operator = 'like'
+    }
+    // 数值和关键词默认使用eq
+    else if (field.control === 'input' || field.control === 'number') {
+      operator = 'eq'
+    }
+
+    filters.push({
+      field: field.field,
+      operator: operator,
+      value: filterValue
+    })
+  })
+
+  return filters
+}
+
 // 查询
 const onSearch = async () => {
+  const filters = buildFilters()
+
+  if (filters.length === 0) {
+    ElMessage.warning('请至少填写一个查询条件')
+    return
+  }
+
   pagination.page = 1
-  await loadData()
+  await loadData(filters)
 }
 
 // 重置
 const onReset = () => {
-  queryForm.dateRange = []
-  queryForm.region = ''
-  queryForm.keywords = ''
-  queryForm.serialNumber = ''
-  queryForm.type = ''
+  // 重置所有表单字段
+  fieldConfigs.value.forEach(field => {
+    if (field.control === 'switch') {
+      queryForm[field.field] = undefined
+    } else if (field.control === 'daterange') {
+      queryForm[field.field] = []
+    } else {
+      queryForm[field.field] = undefined
+    }
+  })
+
   pagination.page = 1
   pagination.total = 0
   tableData.value = []
@@ -347,41 +464,39 @@ const onReset = () => {
 // 分页变化
 const onPageChange = (page: number) => {
   pagination.page = page
-  loadData()
+  const filters = buildFilters()
+  loadData(filters)
 }
 
 // 加载数据
-const loadData = async () => {
+const loadData = async (filters: FilterCondition[]) => {
   loading.search = true
   analysisReport.value = ''
   analysisSummary.value = null
 
   try {
-    const params: any = {
+    const params = {
+      filters: filters,
+      logic: 'AND' as 'AND',
       page: pagination.page,
-      size: pagination.pageSize
+      size: pagination.pageSize,
+      sort_field: 'accept_time',
+      sort_order: 'desc' as 'desc'
     }
 
-    if (queryForm.dateRange && queryForm.dateRange.length === 2) {
-      params.start_time = queryForm.dateRange[0]
-      params.end_time = queryForm.dateRange[1]
-    }
-    if (queryForm.region) {
-      params.region = queryForm.region
-    }
-    if (queryForm.keywords) {
-      params.keywords = queryForm.keywords
-    }
-    if (queryForm.serialNumber) {
-      params.serial_number = queryForm.serialNumber
-    }
-    if (queryForm.type) {
-      params.type = queryForm.type
-    }
-
-    const res = await api.searchComplaints(params)
+    const res = await api.comprehensiveSearch(params)
     if (res.code === 2000) {
-      tableData.value = res.data.data || []
+      // 转换数据格式以适配表格
+      const rawData = res.data.data || []
+      tableData.value = rawData.map(item => ({
+        serial_number: item.id || '',
+        title: item.title || '',
+        content: item.content || '',
+        time: item.accept_time || '',
+        region: item.region || '',
+        status: item.status || '',
+        type: item.complaint_type || ''
+      }))
       pagination.total = res.data.total || 0
       ElMessage.success(`查询成功，共 ${pagination.total} 条记录`)
     } else {
@@ -425,45 +540,8 @@ const onAnalyze = async () => {
     return
   }
 
-  loading.analysis = true
-
-  try {
-    const params: any = {}
-
-    if (queryForm.dateRange && queryForm.dateRange.length === 2) {
-      params.start_time = queryForm.dateRange[0]
-      params.end_time = queryForm.dateRange[1]
-    }
-    if (queryForm.region) {
-      params.region = queryForm.region
-    }
-    if (queryForm.keywords) {
-      params.keywords = queryForm.keywords
-    }
-    if (queryForm.serialNumber) {
-      params.serial_number = queryForm.serialNumber
-    }
-    if (queryForm.type) {
-      params.type = queryForm.type
-    }
-
-    const res = await api.analyzeComplaints(params)
-    if (res.code === 2000) {
-      analysisReport.value = res.data.analysis
-      analysisSummary.value = res.data.summary
-      ElMessage.success('分析报告生成成功')
-
-      await nextTick()
-      analysisSectionRef.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    } else {
-      ElMessage.error(res.msg || '分析失败')
-    }
-  } catch (error: any) {
-    console.error('分析失败:', error)
-    ElMessage.error('分析失败，请重试')
-  } finally {
-    loading.analysis = false
-  }
+  ElMessage.info('大模型分析功能开发中...')
+  // TODO: 基于综合查询条件生成分析报告
 }
 
 // 导出报告
@@ -498,6 +576,11 @@ const onExportReport = async () => {
     loading.exporting = false
   }
 }
+
+onMounted(async () => {
+  // 页面加载时初始化字段配置
+  await initFieldConfigs()
+})
 </script>
 
 <style scoped lang="scss">
@@ -519,6 +602,12 @@ const onExportReport = async () => {
       .panel-title h2 {
         font-weight: 600;
         font-size: 16px;
+      }
+
+      .field-count {
+        font-size: 14px;
+        color: #909399;
+        margin-left: 12px;
       }
 
       .panel-title {
