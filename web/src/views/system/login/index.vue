@@ -128,6 +128,15 @@ onMounted(() => {
 	height: 100%;
 	background: var(--el-color-white);
 
+  /* 强制覆盖主题色为蓝色，确保登录页不受全局主题影响 */
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-5: #a0cfff;
+  --el-color-primary-light-7: #c6e2ff;
+  --el-color-primary-light-8: #d9ecff;
+  --el-color-primary-light-9: #ecf5ff;
+  --el-color-primary-dark-2: #337ecc;
+
 	.login-left {
 		flex: 1;
 		position: relative;
