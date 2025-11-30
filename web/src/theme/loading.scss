@@ -1,51 +1,75 @@
 .loading-next {
 	width: 100%;
 	height: 100%;
+	background: #ffffff; /* 保持背景白净 */
+	z-index: 9999; /* 确保在最上层 */
+	position: fixed;
+	top: 0;
+	left: 0;
 }
 .loading-next .loading-next-box {
 	position: absolute;
-	top: 50%;
+	top: 40%; /*稍微偏上一点，视觉更平衡*/
 	left: 50%;
 	transform: translate(-50%, -50%);
+	text-align: center;
 }
 .loading-next .loading-next-box-warp {
 	width: 80px;
 	height: 80px;
+	margin: 0 auto;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
-.loading-next .loading-next-box-warp .loading-next-box-item {
-	width: 33.333333%;
-	height: 33.333333%;
-	background: var(--el-color-primary);
-	float: left;
-	animation: loading-next-animation 1.2s infinite ease;
-	border-radius: 1px;
+
+/* 外部旋转圆环 */
+.loading-next .loading-ring {
+	position: absolute;
+	width: 70px;
+	height: 70px;
+	border: 3px solid var(--el-color-primary-light-8); /* 浅色底环 */
+	border-top-color: var(--el-color-primary); /* 主色动环 */
+	border-radius: 50%;
+	animation: loading-rotate 1s linear infinite;
 }
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(7) {
-	animation-delay: 0s;
+
+/* 中间呼吸的Logo */
+.loading-next .loading-logo {
+	width: 36px;
+	height: 36px;
+	object-fit: contain;
+	animation: loading-breath 2s ease-in-out infinite alternate;
 }
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(4),
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(8) {
-	animation-delay: 0.1s;
+
+/* 底部文字 */
+.loading-next .loading-text {
+	margin-top: 15px;
+	font-size: 14px;
+	color: var(--el-color-primary);
+	letter-spacing: 1px;
+	font-weight: 500;
 }
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(1),
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(5),
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(9) {
-	animation-delay: 0.2s;
-}
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(2),
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(6) {
-	animation-delay: 0.3s;
-}
-.loading-next .loading-next-box-warp .loading-next-box-item:nth-child(3) {
-	animation-delay: 0.4s;
-}
-@keyframes loading-next-animation {
-	0%,
-	70%,
-	100% {
-		transform: scale3D(1, 1, 1);
+
+/* 旋转动画 */
+@keyframes loading-rotate {
+	0% {
+		transform: rotate(0deg);
 	}
-	35% {
-		transform: scale3D(0, 0, 1);
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+/* 呼吸动画 */
+@keyframes loading-breath {
+	0% {
+		transform: scale(0.9);
+		opacity: 0.8;
+	}
+	100% {
+		transform: scale(1.1);
+		opacity: 1;
 	}
 }

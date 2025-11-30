@@ -19,16 +19,10 @@ export const NextLoading = {
 		const htmls = `
 			<div class="loading-next-box">
 				<div class="loading-next-box-warp">
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
-					<div class="loading-next-box-item"></div>
+					<div class="loading-ring"></div>
+					<img src="/favicon.ico" class="loading-logo" alt="loading..." />
 				</div>
+				<div class="loading-text">系统资源加载中...</div>
 			</div>
 		`;
 		div.innerHTML = htmls;
