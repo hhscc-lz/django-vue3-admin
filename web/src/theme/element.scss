@@ -307,22 +307,146 @@
 	color: var(--el-color-white) !important;
 }
 
-/* Drawer 抽屉
-------------------------------- */
-.el-drawer {
-	--el-drawer-padding-primary: unset !important;
-	.el-drawer__header {
-		padding: 0 15px !important;
+
+/* ==============================================
+   Modern UI Overrides (Card & Table)
+   ============================================== */
+
+/* 1. Card 卡片优化 - 去边框化 & 悬浮感 */
+.el-card {
+	border: none !important;
+	border-radius: 8px !important; /* 更圆润的边角 */
+	background-color: #ffffff;
+	box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08) !important; /* 基础柔和阴影 */
+	transition: all 0.3s ease-in-out; /* 平滑过渡 */
+
+	&:hover {
+		transform: translateY(-2px); /* 轻微上浮 */
+		box-shadow: 0 4px 16px rgba(0, 21, 41, 0.12) !important; /* 加深阴影 */
+	}
+
+	.el-card__header {
+		padding: 16px 20px !important;
+		border-bottom: 1px solid #f0f2f5 !important; /* 极淡的分割线 */
+		font-weight: 600;
+		font-size: 16px;
+	}
+
+	.el-card__body {
+		padding: 20px !important;
+	}
+}
+
+/* 2. Table 表格优化 - 通透感 */
+.el-table {
+	--el-table-border-color: #f0f2f5; /* 极淡的边框色 */
+	--el-table-header-bg-color: #f5f7fa; /* 表头浅灰背景 */
+	border-radius: 8px; /* 表格整体圆角 */
+	overflow: hidden; /* 防止圆角被直角覆盖 */
+
+	/* 去除外边框和纵向边框 */
+	&.el-table--border, 
+	&.el-table--group {
+		border: none !important;
+	}
+	
+	/* 去除单元格纵向边框 */
+	.el-table__cell {
+		border-right: none !important;
+	}
+	
+	/* 只有表头保留底部粗线条 */
+	th.el-table__cell {
+		background-color: var(--el-table-header-bg-color) !important;
+		color: #303133;
+		font-weight: 600;
 		height: 50px;
-		display: flex;
-		align-items: center;
-		margin-bottom: 0 !important;
-		border-bottom: 1px solid var(--el-border-color);
-		color: var(--el-text-color-primary);
+		border-bottom: 1px solid #ebeef5 !important;
 	}
-	.el-drawer__body {
-		width: 100%;
-		height: 100%;
-		overflow: auto;
+
+	/* 内容行样式 */
+	td.el-table__cell {
+		padding: 12px 0 !important; /* 增加行高 */
+		color: #606266;
 	}
+
+	/* 鼠标悬浮高亮色 */
+	.el-table__body tr:hover > td {
+		background-color: #f5f7fa !important;
+	}
+}
+
+/* 修复表格底部的线条 */
+.el-table::before {
+	display: none;
+}
+
+/* 3. Sidebar Menu 侧边栏优化 - 左侧光标风格 */
+/* 注意：这里使用了 :where() 或提高权重来覆盖 Element Plus 默认样式 */
+
+.layout-container .el-aside {
+	/* 菜单项基础样式优化 */
+	.el-menu-item, .el-sub-menu__title {
+		margin: 4px 0 !important; /* 增加垂直间距 */
+		border-radius: 0 4px 4px 0 !important; /* 右侧圆角 */
+		border-left: 3px solid transparent !important; /* 预留左侧光标位 */
+		transition: all 0.3s;
+	}
+
+	/* 选中状态 */
+	.el-menu-item.is-active {
+		background-color: rgba(var(--el-color-primary-rgb), 0.1) !important; /* 之前的透明背景现在改为低透明度的主色 */
+		/* 注意：如果你没有定义 --el-color-primary-rgb，可以用 rgba(192, 57, 43, 0.1) 代替，或者直接用下面的 */
+		background-color: rgba(0, 0, 0, 0.2) !important; /* 深色模式下的选中背景加深 */
+		color: #ffffff !important;
+		font-weight: 600;
+		border-left-color: var(--el-color-primary) !important; /* 左侧亮色光标 */
+		
+		/* 如果想要更强烈的效果，可以加一个右向的渐变背景 */
+		background: linear-gradient(90deg, rgba(var(--el-color-primary-rgb), 0.15) 0%, transparent 100%) !important;
+	}
+
+	/* 悬停状态 */
+	.el-menu-item:hover, .el-sub-menu__title:hover {
+		background-color: rgba(255, 255, 255, 0.05) !important; /* 微微发白 */
+		color: #ffffff !important;
+	}
+}
+
+/* ==============================================
+   4. Scrollbar & Dialog Beautification
+   ============================================== */
+
+/* 4.1 Custom Scrollbar */
+/* WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #dcdfe6; /* 浅灰色滑块 */
+	border-radius: 4px;
+	transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #c0c4cc; /* 悬停加深 */
+}
+
+/* Firefox */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #dcdfe6 transparent;
+}
+
+/* 4.2 Dialog Frosted Glass Effect */
+.el-overlay {
+	background-color: rgba(0, 0, 0, 0.4) !important; /* 确保是半透明黑 */
+	backdrop-filter: blur(5px); /* 核心：背景磨砂模糊 */
+	-webkit-backdrop-filter: blur(5px);
 }

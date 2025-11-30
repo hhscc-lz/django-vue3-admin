@@ -21,6 +21,15 @@ import { Local, Session } from '/@/utils/storage';
 import mittBus from '/@/utils/mitt';
 import setIntroduction from '/@/utils/setIconfont';
 
+// 优先执行：检查版本号并清理缓存
+// 设置皮肤缓存版本，每次更新版本可以所有用户清空缓存
+const themeConfigVersion = '1.0.2';
+if (Local.get('themeConfigVersion') !== themeConfigVersion) {
+    Local.clear();
+    Local.set('themeConfigVersion', themeConfigVersion);
+    // 既然是 setup 阶段，还未渲染，直接 reload 最安全
+    window.location.reload();
+}
 
 // 引入组件
 const LockScreen = defineAsyncComponent(() => import('/@/layout/lockScreen/index.vue'));
@@ -70,15 +79,7 @@ onMounted(() => {
 		mittBus.on('openSetingsDrawer', () => {
 			setingsRef.value.openDrawer();
 		});
-    // 设置皮肤缓存版本，每次更新版本可以所有用户清空缓存
-    const themeConfigVersion = '1.0.0'
-		// 获取缓存中的布局配置
-    if (Local.get('themeConfigVersion') !== themeConfigVersion) {
-        Local.clear();
-        Local.set('themeConfigVersion', themeConfigVersion);
-	      window.location.reload();
-        return
-    }
+    
 		if (Local.get('themeConfig')) {
 			storesThemeConfig.setThemeConfig({ themeConfig: Local.get('themeConfig') });
 			document.documentElement.style.cssText = Local.get('themeConfigStyle');

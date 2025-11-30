@@ -56,7 +56,7 @@ export const useThemeConfig = defineStore('themeConfig', {
 			globalViceTitle: '社情民意分析决策平台',
 			globalViceTitleMsg: '长春市12345政务服务便民热线',
 			globalI18n: 'zh-cn',
-			globalComponentSize: 'default',
+			globalComponentSize: 'small',
 		},
 	}),
 	actions: {
