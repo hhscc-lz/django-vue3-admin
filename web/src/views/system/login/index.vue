@@ -47,7 +47,7 @@
 		</div>
 
 		<div class="login-authorization z-10">
-			<p>Copyright © {{ getSystemConfig['login.copyright'] || '2025 长春市政务服务和数字化建设管理局 版权所有' }}</p>
+			<p>Copyright © {{ getSystemConfig['login.copyright'] || '民心' }}</p>
 		</div>
 	</div>
 	<div v-if="loginBg">
