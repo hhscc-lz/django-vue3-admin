@@ -196,7 +196,7 @@ export default defineComponent({
         		query: Object.keys(<string>route.query?.params).length > 0 ? JSON.parse(<string>route.query?.params) : '',
         	});
         } else {
-        	router.push('/');
+        	router.push('/home');
         }
         // 登录成功提示
         // 关闭 loading
