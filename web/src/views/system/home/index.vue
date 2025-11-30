@@ -1,10 +1,6 @@
 <template>
 	<div class="home-container">
-		<div style="height: 100%; display: flex; justify-content: center; flex-direction: column;">
-			<div style="text-align: center;">
-				<img draggable="false" src="./home.png" style="margin: auto;">
-			</div>
-		</div>
+		<iframe src="http://10.0.246.30:8884" frameborder="0" width="100%" height="100%"></iframe>
 	</div>
 </template>
 
@@ -13,7 +9,7 @@
 
 <style scoped lang="scss">
 .home-container {
-	margin-top: 100px;
-	overflow: hidden;
+	height: 100%;
+	width: 100%;
 }
 </style>
