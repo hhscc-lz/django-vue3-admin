@@ -2,7 +2,7 @@ version: "3"
 services:
   dvadmin3-web:
     container_name: dvadmin3-web
-    image: changchun/dvadmin3-web-arm64:0.0.1
+    image: changchun/dvadmin3-web-arm64:0.0.2
     ports:
       - "8883:8080"  # 宿主机8883映射到容器8080
     environment:
