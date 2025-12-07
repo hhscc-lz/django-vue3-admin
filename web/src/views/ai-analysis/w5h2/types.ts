@@ -110,6 +110,14 @@ export interface ComprehensiveSearchRequest {
 }
 
 /**
+ * 综合查询分析请求
+ */
+export interface ComprehensiveAnalyzeRequest {
+  filters: FilterCondition[]
+  logic: 'AND' | 'OR'
+}
+
+/**
  * 综合查询响应
  */
 export interface ComprehensiveSearchResponse {

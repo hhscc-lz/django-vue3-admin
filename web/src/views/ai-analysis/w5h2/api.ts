@@ -9,7 +9,9 @@ import type {
   FieldOptionRequest,
   FieldOptionResponse,
   ComprehensiveSearchRequest,
-  ComprehensiveSearchResponse
+  ComprehensiveSearchResponse,
+  ComprehensiveAnalyzeRequest,
+  AnalyzeResponse
 } from './types'
 
 // ==================== 综合查询API ====================
@@ -59,5 +61,19 @@ export function getComplaintDetail(
   return llmRequest({
     url: `/llm/comprehensive/detail/${serialNumber}`,
     method: 'get'
+  })
+}
+
+
+/**
+ * 5. 综合查询大模型分析
+ */
+export function comprehensiveAnalyze(
+  params: ComprehensiveAnalyzeRequest
+): Promise<ApiResponse<AnalyzeResponse>> {
+  return llmRequest({
+    url: '/llm/comprehensive/analyze',
+    method: 'post',
+    data: params
   })
 }

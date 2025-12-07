@@ -535,13 +535,40 @@ const openDetail = async (serialNumber: string) => {
 
 // 大模型分析
 const onAnalyze = async () => {
-  if (pagination.total === 0) {
-    ElMessage.warning('请先执行查询后再进行分析')
+  const filters = buildFilters()
+  if (filters.length === 0) {
+    ElMessage.warning('请至少填写一个查询条件后再进行分析')
     return
   }
 
-  ElMessage.info('大模型分析功能开发中...')
-  // TODO: 基于综合查询条件生成分析报告
+  loading.analysis = true
+  analysisReport.value = ''
+  analysisSummary.value = null
+
+  try {
+    const params = {
+      filters: filters,
+      logic: 'AND' as 'AND'
+    }
+    const res = await api.comprehensiveAnalyze(params)
+    if (res.code === 2000) {
+      analysisReport.value = res.data.analysis
+      analysisSummary.value = res.data.summary
+      ElMessage.success('分析报告生成成功')
+      // 滚动到分析报告区域
+      await nextTick()
+      if (analysisSectionRef.value) {
+        analysisSectionRef.value.$el.scrollIntoView({ behavior: 'smooth' })
+      }
+    } else {
+      ElMessage.error(res.msg || '分析失败')
+    }
+  } catch (error: any) {
+    console.error('分析失败:', error)
+    ElMessage.error('分析失败，请重试')
+  } finally {
+    loading.analysis = false
+  }
 }
 
 // 导出报告
