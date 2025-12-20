@@ -154,6 +154,7 @@ export interface FieldConfigResponse {
 export interface FieldOptionRequest {
   field: string
   size?: number
+  parent_filters?: FilterCondition[]  // 父级字段过滤条件（用于级联）
 }
 
 /**

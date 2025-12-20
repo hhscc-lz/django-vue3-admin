@@ -255,7 +255,7 @@
 </template>
 
 <script setup lang="ts" name="w5h2Analysis">
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import MarkdownIt from 'markdown-it'
@@ -339,7 +339,65 @@ const loadFieldOptions = async (fieldName: string) => {
   if (fieldOptionsCache.value[fieldName]) return
 
   try {
-    const res = await api.getFieldOptions({ field: fieldName, size: 100 })
+    // 构建父级过滤条件（用于分类级联）
+    const parentFilters: FilterCondition[] = []
+
+    // 二级分类：需要一级分类
+    if (fieldName === 'category_level2' && queryForm.category_level1) {
+      parentFilters.push({
+        field: 'category_level1',
+        operator: 'eq',
+        value: queryForm.category_level1
+      })
+    }
+    // 三级分类：需要一级、二级分类
+    else if (fieldName === 'category_level3') {
+      if (queryForm.category_level1) {
+        parentFilters.push({
+          field: 'category_level1',
+          operator: 'eq',
+          value: queryForm.category_level1
+        })
+      }
+      if (queryForm.category_level2) {
+        parentFilters.push({
+          field: 'category_level2',
+          operator: 'eq',
+          value: queryForm.category_level2
+        })
+      }
+    }
+    // 四级分类：需要一级、二级、三级分类
+    else if (fieldName === 'category_level4') {
+      if (queryForm.category_level1) {
+        parentFilters.push({
+          field: 'category_level1',
+          operator: 'eq',
+          value: queryForm.category_level1
+        })
+      }
+      if (queryForm.category_level2) {
+        parentFilters.push({
+          field: 'category_level2',
+          operator: 'eq',
+          value: queryForm.category_level2
+        })
+      }
+      if (queryForm.category_level3) {
+        parentFilters.push({
+          field: 'category_level3',
+          operator: 'eq',
+          value: queryForm.category_level3
+        })
+      }
+    }
+
+    const res = await api.getFieldOptions({
+      field: fieldName,
+      size: 100,
+      parent_filters: parentFilters.length > 0 ? parentFilters : undefined
+    })
+
     if (res.code === 2000) {
       fieldOptionsCache.value[fieldName] = res.data.options
     }
@@ -603,6 +661,47 @@ const onExportReport = async () => {
     loading.exporting = false
   }
 }
+
+// ==================== 级联清空逻辑 ====================
+// 监听一级分类变化
+watch(() => queryForm.category_level1, (newVal, oldVal) => {
+  // 只有当值真正改变时才清空（避免初始化时触发）
+  if (oldVal !== undefined && newVal !== oldVal) {
+    // 清空二级、三级、四级分类
+    queryForm.category_level2 = undefined
+    queryForm.category_level3 = undefined
+    queryForm.category_level4 = undefined
+
+    // 清空缓存，强制重新加载
+    delete fieldOptionsCache.value['category_level2']
+    delete fieldOptionsCache.value['category_level3']
+    delete fieldOptionsCache.value['category_level4']
+  }
+})
+
+// 监听二级分类变化
+watch(() => queryForm.category_level2, (newVal, oldVal) => {
+  if (oldVal !== undefined && newVal !== oldVal) {
+    // 清空三级、四级分类
+    queryForm.category_level3 = undefined
+    queryForm.category_level4 = undefined
+
+    // 清空缓存
+    delete fieldOptionsCache.value['category_level3']
+    delete fieldOptionsCache.value['category_level4']
+  }
+})
+
+// 监听三级分类变化
+watch(() => queryForm.category_level3, (newVal, oldVal) => {
+  if (oldVal !== undefined && newVal !== oldVal) {
+    // 清空四级分类
+    queryForm.category_level4 = undefined
+
+    // 清空缓存
+    delete fieldOptionsCache.value['category_level4']
+  }
+})
 
 onMounted(async () => {
   // 页面加载时初始化字段配置
