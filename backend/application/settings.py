@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "dvadmin.system",
     "plugins.complaint",  # 工单管理插件
     "plugins.risk_warning",  # 风险预警插件
+    "plugins.group_event",  # 群体事件插件
     "plugins.spatial_annotation",  # 空间标注插件
     "plugins.subject_annotation",  # 主体标注插件
     "plugins.topic_annotation",  # 专题标注插件
@@ -415,6 +416,10 @@ PLUGINS_URL_PATTERNS = [
     {
         're_path': r'^api/risk_warning/',
         'include': 'plugins.risk_warning.urls'
+    },
+    {
+        're_path': r'^api/group_event/',
+        'include': 'plugins.group_event.urls'
     },
     {
         're_path': r'^api/spatial_annotation/',
