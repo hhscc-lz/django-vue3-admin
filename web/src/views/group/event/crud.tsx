@@ -60,20 +60,32 @@ export const createCrudOptions = function (
       // 行操作配置
       rowHandle: {
         fixed: 'right',
-        width: 200,
+        width: 220,
         buttons: {
+          // 查看触发工单详情
           view: {
             show: true,
             text: '查看详情',
             type: 'primary',
-            link: true
+            link: true,
+            click: ({ row }: any) => {
+              // 打开触发工单详情
+              if (complaintDetailRef && complaintDetailRef.value) {
+                complaintDetailRef.value.open(row.trigger_complaint_id)
+              } else {
+                ElMessage.warning('工单详情组件未加载')
+              }
+            }
           },
           // 自定义按钮：查看关联工单
           viewComplaints: {
+            show: true,
             text: '关联工单',
             type: 'success',
             link: true,
+            order: 2,
             click: ({ row }: any) => {
+              console.log('点击关联工单按钮，row:', row)
               // 打开关联工单对话框
               if (relatedComplaintsDialogRef && relatedComplaintsDialogRef.value) {
                 relatedComplaintsDialogRef.value.open(row.id, row.title)

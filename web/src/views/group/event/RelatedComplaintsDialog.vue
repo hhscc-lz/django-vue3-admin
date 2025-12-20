@@ -62,9 +62,9 @@ import { GetRelatedComplaints } from './api'
 import type { GroupEventComplaint } from './types'
 import dayjs from 'dayjs'
 
-// Emits
-const emit = defineEmits<{
-  viewComplaint: [complaintId: string]
+// Props
+const props = defineProps<{
+  complaintDetailRef?: any
 }>()
 
 // 弹窗显示状态
@@ -154,7 +154,12 @@ const formatDateTime = (datetime: string | null) => {
  * 查看工单详情
  */
 const viewComplaintDetail = (complaintId: string) => {
-  emit('viewComplaint', complaintId)
+  // 调用工单详情弹窗
+  if (props.complaintDetailRef && props.complaintDetailRef.open) {
+    props.complaintDetailRef.open(complaintId)
+  } else {
+    console.error('工单详情组件未加载或未传入')
+  }
 }
 
 // 暴露方法给父组件
