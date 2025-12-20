@@ -6,7 +6,10 @@
     <ComplaintDetail ref="complaintDetailRef" />
 
     <!-- 关联工单列表对话框 -->
-    <RelatedComplaintsDialog ref="relatedComplaintsDialogRef" />
+    <RelatedComplaintsDialog
+      ref="relatedComplaintsDialogRef"
+      @view-complaint="handleViewComplaint"
+    />
   </fs-page>
 </template>
 
@@ -50,6 +53,13 @@ const { resetCrudOptions } = useCrud({ crudExpose, crudOptions })
 onMounted(() => {
   crudExpose.doRefresh()
 })
+
+// 处理查看工单详情事件
+const handleViewComplaint = (complaintId: string) => {
+  if (complaintDetailRef.value) {
+    complaintDetailRef.value.open(complaintId)
+  }
+}
 </script>
 
 <style scoped lang="scss">

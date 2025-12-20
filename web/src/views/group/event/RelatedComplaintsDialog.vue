@@ -62,6 +62,11 @@ import { GetRelatedComplaints } from './api'
 import type { GroupEventComplaint } from './types'
 import dayjs from 'dayjs'
 
+// Emits
+const emit = defineEmits<{
+  viewComplaint: [complaintId: string]
+}>()
+
 // 弹窗显示状态
 const visible = ref(false)
 // 加载状态
@@ -149,9 +154,7 @@ const formatDateTime = (datetime: string | null) => {
  * 查看工单详情
  */
 const viewComplaintDetail = (complaintId: string) => {
-  // 这里可以打开工单详情弹窗
-  // 需要传入 complaintDetailRef
-  console.log('查看工单详情:', complaintId)
+  emit('viewComplaint', complaintId)
 }
 
 // 暴露方法给父组件
