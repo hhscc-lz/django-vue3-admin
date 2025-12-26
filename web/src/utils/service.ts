@@ -207,7 +207,7 @@ function createLLMService() {
 
 	const llmService = axios.create({
 		baseURL: llmBaseURL,
-		timeout: 300000, // 5 分钟超时（LLM 调用耗时）
+		timeout: 3000000, // 50 分钟超时（LLM 调用耗时）
 		headers: {
 			'Content-Type': 'application/json;charset=utf-8',
 		},
@@ -261,7 +261,7 @@ function createLLMRequestFunction(llmService: any) {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			timeout: 300000, // 5 分钟超时
+			timeout: 3000000, // 50 分钟超时
 			data: {},
 		};
 		Object.assign(configDefault, config);
