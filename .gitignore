@@ -11,3 +11,13 @@ web/package-lock.json
 /reference
 
 *.tar
+
+deploy-tar/
+
+*.log
+
+*.out
+
+backend/all_migrations/**/migrations
+
+*.gz
