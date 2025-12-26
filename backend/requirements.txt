@@ -9,7 +9,7 @@ djangorestframework_simplejwt==5.4.0
 
 # 数据库和迁移
 django-comment-migrate==0.1.7
-mysqlclient==2.2.4
+PyMySQL==1.1.0
 
 # Django 扩展
 django-cors-headers==4.4.0
