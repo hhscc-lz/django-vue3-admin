@@ -6,11 +6,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
 
-from .models import GroupEvent, GroupEventComplaint
+from .models import GroupEvent, GroupEventComplaint, GroupEventDailySummary
 from .serializers import (
     GroupEventSerializer,
     GroupEventDetailSerializer,
     GroupEventComplaintSerializer,
+    DailySummarySerializer,
 )
 from dvadmin.utils.viewset import CustomModelViewSet
 
@@ -172,3 +173,98 @@ class GroupEventViewSet(CustomModelViewSet):
             'code': 4000,
             'msg': '群体事件数据为只读，不支持删除操作'
         }, status=403)
+
+
+class DailySummaryFilter(filters.FilterSet):
+    """
+    每日摘要过滤器
+    """
+    # 精确匹配日期
+    summary_date = filters.DateFilter(
+        field_name='summary_date',
+        lookup_expr='exact',
+        label='摘要日期'
+    )
+    # 日期范围
+    summary_date_start = filters.DateFilter(
+        field_name='summary_date',
+        lookup_expr='gte',
+        label='摘要日期开始'
+    )
+    summary_date_end = filters.DateFilter(
+        field_name='summary_date',
+        lookup_expr='lte',
+        label='摘要日期结束'
+    )
+
+    class Meta:
+        model = GroupEventDailySummary
+        fields = ['summary_date', 'summary_date_start', 'summary_date_end']
+
+
+class DailySummaryViewSet(CustomModelViewSet):
+    """
+    群体事件每日摘要视图集 (只读)
+
+    提供功能：
+    - list: 列表查询（分页）
+    - retrieve_by_date: 按日期获取摘要
+    """
+    queryset = GroupEventDailySummary.objects.all()
+    serializer_class = DailySummarySerializer
+    filterset_class = DailySummaryFilter
+    ordering_fields = ['summary_date', 'event_count']
+    ordering = ['-summary_date']
+
+    # 禁用创建、更新、删除操作
+    http_method_names = ['get', 'head', 'options']
+
+    @action(methods=['get'], detail=False, url_path='list')
+    def list_summaries(self, request):
+        """
+        获取摘要列表（分页）
+
+        URL: /api/group_event/daily-summary/list
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # 分页参数
+        page = int(request.query_params.get('page', 1))
+        limit = int(request.query_params.get('limit', 20))
+
+        total = queryset.count()
+        start = (page - 1) * limit
+        end = start + limit
+        paginated = queryset[start:end]
+
+        serializer = self.get_serializer(paginated, many=True)
+
+        return Response({
+            'code': 2000,
+            'msg': 'success',
+            'data': serializer.data,
+            'total': total,
+            'page': page,
+            'limit': limit
+        })
+
+    @action(methods=['get'], detail=False, url_path=r'(?P<date>\d{4}-\d{2}-\d{2})')
+    def retrieve_by_date(self, request, date=None):
+        """
+        按日期获取摘要
+
+        URL: /api/group_event/daily-summary/{date}
+        """
+        try:
+            summary = GroupEventDailySummary.objects.get(summary_date=date)
+            serializer = self.get_serializer(summary)
+            return Response({
+                'code': 2000,
+                'msg': 'success',
+                'data': serializer.data
+            })
+        except GroupEventDailySummary.DoesNotExist:
+            return Response({
+                'code': 4000,
+                'msg': f'未找到 {date} 的摘要数据'
+            }, status=404)

@@ -3,7 +3,7 @@
 """
 from rest_framework import serializers
 from dvadmin.utils.serializers import CustomModelSerializer
-from .models import GroupEvent, GroupEventComplaint
+from .models import GroupEvent, GroupEventComplaint, GroupEventDailySummary
 from plugins.complaint.models import Complaint
 
 
@@ -115,5 +115,18 @@ class GroupEventComplaintSerializer(CustomModelSerializer):
             'id', 'group_event_id', 'event_title',
             'complaint_id', 'complaint_detail',
             'created_at'
+        ]
+        read_only_fields = fields
+
+
+class DailySummarySerializer(CustomModelSerializer):
+    """
+    群体事件每日摘要序列化器
+    """
+    class Meta:
+        model = GroupEventDailySummary
+        fields = [
+            'id', 'summary_date', 'title', 'content',
+            'event_count', 'event_ids', 'created_at'
         ]
         read_only_fields = fields

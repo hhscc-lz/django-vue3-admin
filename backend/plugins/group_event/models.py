@@ -73,3 +73,34 @@ class GroupEventComplaint(models.Model):
 
     def __str__(self):
         return f"Event {self.group_event_id} - Complaint {self.complaint_id}"
+
+
+class GroupEventDailySummary(models.Model):
+    """
+    群体事件每日摘要表 (只读映射)
+
+    存储 AI 生成的每日摘要报告
+    """
+    # 主键
+    id = models.AutoField(primary_key=True)
+
+    # 摘要信息
+    summary_date = models.DateField(unique=True, verbose_name='摘要日期')
+    title = models.CharField(max_length=200, verbose_name='日报标题')
+    content = models.TextField(verbose_name='日报正文内容')
+    event_count = models.IntegerField(default=0, verbose_name='当日群体事件数量')
+    event_ids = models.JSONField(null=True, blank=True, verbose_name='关联的群体事件ID列表')
+
+    # 时间戳
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'group_event_daily_summaries'
+        managed = False  # 不让 Django 管理表结构
+        verbose_name = '群体事件每日摘要'
+        verbose_name_plural = verbose_name
+        ordering = ['-summary_date']
+
+    def __str__(self):
+        return f"{self.summary_date} - {self.title}"
